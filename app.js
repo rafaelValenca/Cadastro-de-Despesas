@@ -1,14 +1,14 @@
-class Despesa {
-    constructor(ano, mes, dia , tipo, descricao, valor) {
-        this.ano = ano
-        this.mes = mes
-        this.dia = dia
-        this.tipo = tipo
-        this.descricao = descricao
-        this.valor = valor
+class Expense {
+    constructor(year, month, day , type, description, value) {
+        this.year = year
+        this.month = month
+        this.day = day
+        this.type = type
+        this.description = description
+        this.value = value
     }
 
-    validarDados() { // validando dados
+    validateData() { 
         for(let i in this) {
            if(this[i] == undefined || this[i] == '' || this[i] == null) { //return false
                return false
@@ -21,187 +21,200 @@ class Despesa {
 class Bd {
 
     constructor() {    
-        let id = localStorage.getItem('id')//pro id ser difetente de null e começar como 0
+        let id = localStorage.getItem('id')// id != null and start 0
  
         if(id === null) {
             localStorage.setItem('id', 0)
         }
     }
 
-    getProximoId() {
-        let proximoId = localStorage.getItem('id')  
-        return parseInt(proximoId) + 1      //priximo ID, ID +1 par vim 1,2,3,4
+    getNextId() {
+        let NextId = localStorage.getItem('id')  
+        return parseInt(NextId) + 1      //next ID, ID +1 = 1,2,3,4
     } 
 
-    gravar(d) {
-        let id = this.getProximoId()        //gravando id 
-        localStorage.setItem(id, JSON.stringify(d)) //convertendo para json
-        localStorage.setItem('id', id)       // atualizando o id
+    save(d) {
+        let id = this.getNextId()        //save id 
+        localStorage.setItem(id, JSON.stringify(d)) //converting para json
+        localStorage.setItem('id', id)       // updating  id
     }
     
 
-    //LISTAGEM
-    recuperarTodosRegistros() {
-        //array de despesas
-        let despesas = Array()
+    //listing
+    recoverAllRegister() {
+        //array of Expenses
+        let expenses = Array()
 
         let id = localStorage.getItem('id')
-        //recuperar todas as despesas do localstorage
-        for(let list = 1; list <= id; list++) {
-            //recuperar despesas
-            let despesa = JSON.parse(localStorage.getItem(list)) //convertendo de json para js
+        //recovery all localstorage expenses
+        for(let i = 1; i <= id; i++) {
+            //recovery expenses
+            let expense = JSON.parse(localStorage.getItem(i)) //convertendo de json para js
 
-            //existe a possibiçidade de haver indices que foram pulados
-            if(despesa === null) {
+            //exist the possibility be indexes that were skipped
+            if(expense === null) {
                 continue
             }
-
-            despesas.push(despesa)
+            expense.id = i
+            expenses.push(expense)
         }
-        return despesas
+        return expenses
     }
 
-    //PESQUISA
-    pesquisar(despesa) {
+    //seacrch
+    search(expense) {
 
-        let despesasFiltradas = Array()
-        despesasFiltradas = this.recuperarTodosRegistros()
-        
-        console.log(despesa)
-        console.log(despesasFiltradas)
+        let expensesFilter = Array()
+        expensesFilter = this.recoverAllRegister()
 
-        //filtros
-        if(despesa.ano != ''){
-       despesasFiltradas = despesasFiltradas.filter(d => d.ano == despesa.ano)
+        //filters
+        if(expense.year != ''){
+       expensesFilter = expensesFilter.filter(d => d.year == expense.year)
         }
-        if(despesa.mes != ''){
-       despesasFiltradas =  despesasFiltradas.filter(d => d.mes == despesa.mes)
+        if(expense.month != ''){
+       expensesFilter =  expensesFilter.filter(d => d.month == expense.month)
         }
-        if(despesa.dia != ''){
-        despesasFiltradas = despesasFiltradas.filter(d => d.dia == despesa.dia)
+        if(expense.day != ''){
+        expensesFilter = expensesFilter.filter(d => d.day == expense.day)
         }
-        if(despesa.tipo != ''){
-       despesasFiltradas =  despesasFiltradas.filter(d => d.tipo == despesa.tipo)
+        if(expense.type != ''){
+       expensesFilter =  expensesFilter.filter(d => d.type == expense.type)
         }
-        if(despesa.descricao != ''){
-        despesasFiltradas = despesasFiltradas.filter(d => d.descricao == despesa.descricao)
+        if(expense.description != ''){
+        expensesFilter = expensesFilter.filter(d => d.description == expense.description)
         }
-        if(despesa.valor != ''){
-       despesasFiltradas =  despesasFiltradas.filter(d => d.valor == despesa.valor)
+        if(expense.value != ''){
+       expensesFilter =  expensesFilter.filter(d => d.value == expense.value)
         }
         
-        return despesasFiltradas
+        return expensesFilter
     }
+
+   remove(id){
+		localStorage.removeItem(id)
+	}
 }
 
 let bd = new Bd()
 
-function cadastraDespesa() {
-    let ano = document.getElementById('ano')  //pegando campos do html
-    let mes = document.getElementById('mes')
-    let dia = document.getElementById('dia')
-    let tipo = document.getElementById('tipo')
-    let descricao = document.getElementById('descricao')
-    let valor = document.getElementById('valor')
+function registerExpense() {
+    let year = document.getElementById('year')  //get html field
+    let month = document.getElementById('month')
+    let day = document.getElementById('day')
+    let type = document.getElementById('type')
+    let description = document.getElementById('description')
+    let value = document.getElementById('value')
 
-    let despesa = new Despesa(  //pegando valores
-        ano.value,
-        mes.value,
-        dia.value,
-        tipo.value,
-        descricao.value,
-        valor.value
+    let expense = new Expense(  //get values
+        year.value,
+        month.value,
+        day.value,
+        type.value,
+        description.value,
+        value.value
     )
     
     //modal
-    if(despesa.validarDados()) {
-        bd.gravar(despesa)    //gravando despesa no localstorage
+    if(expense.validateData()) {
+        bd.save(expense)    //saving expense on localstorage
         
-        document.getElementById('modal_titulo').innerHTML = 'Registro inserido com sucesso'  //conteudo interno
-        document.getElementById('modal_titulo_div').className = 'modal-header text-success'
-        document.getElementById('modal_conteudo').innerHTML = 'Despesa foi cadastrada com sucesso'
+        document.getElementById('modal_title').innerHTML = 'Registro inserido com sucesso'  //interal content
+        document.getElementById('modal_title_div').className = 'modal-header text-success'
+        document.getElementById('modal_content').innerHTML = 'Despesa foi cadastrada com sucesso'
         document.getElementById('modal_btn').innerHTML = 'Voltar'
         document.getElementById('modal_btn').className = 'btn btn-success'
 
-        $('#RegistraDespesa').modal('show') // jquery para mostrar o modal
+        $('#modalRegisterExpense').modal('show') // jquery for show modal
 
-        //limpando form apos cadastrar
-        ano.value = ''
-        mes.value = ''
-        dia.value = ''
-        tipo.value = ''
-        descricao.value = ''
-        valor.value = ''
+        //cleaning up form after register
+        year.value = ''
+        month.value = ''
+        day.value = ''
+        type.value = ''
+        description.value = ''
+        value.value = ''
     
     } else {
-        document.getElementById('modal_titulo').innerHTML = 'Erro na inclusão do registro'  //inner html conteudo interno
-        document.getElementById('modal_titulo_div').className = 'modal-header text-danger'
-        document.getElementById('modal_conteudo').innerHTML = 'Erro na gravação'
+        document.getElementById('modal_title').innerHTML = 'Erro na inclusão do registro'  
+        document.getElementById('modal_title_div').className = 'modal-header text-danger'
+        document.getElementById('modal_content').innerHTML = 'Erro na gravação'
         document.getElementById('modal_btn').innerHTML = 'Voltar e corrigir'
         document.getElementById('modal_btn').className = 'btn btn-danger'
         
-        $('#RegistraDespesa').modal('show')
+        $('#modalRegisterExpense').modal('show')
     }
 }  
 
-//LISTAGEM
-function carregarListaDespesas(despesas = Array(), filtro = false) {
+//listing
+function loadListExpenses(expenses = Array(), filter = false) {
 
-    if(despesas.length == 0 && filtro == false) {
-        despesas = bd.recuperarTodosRegistros()
+    if(expenses.length == 0 && filter == false) {
+        expenses = bd.recoverAllRegister()
     }
-    //selecionando elemnto da tabela
-    let listaDespesas = document.getElementById('listaDespesas')
-    listaDespesas.innerHTML = ''
+    //select element of table
+    let listExpenses = document.getElementById("listExpenses")
+    listExpenses.innerHTML = ''
 
- //percorrer o array despesas, listando cada despesa de forma dinamica
-    despesas.forEach(function(d) {
+ //llisting array dynamics
+    expenses.forEach(function(d) {
         //tr
-        let linha = listaDespesas.insertRow()
+        let line = listExpenses.insertRow()
 
-        //criar as colunas (td)
-        linha.insertCell(0).innerHTML = `${d.dia}/${d.mes}/${d.ano}`
+        //create cols (td)
+        line.insertCell(0).innerHTML = `${d.day}/${d.month}/${d.year}`
 
-        //ajustar o tipo
-        switch(d.tipo) {
-            case '1': d.tipo = 'alimentação'
+        //adjust type
+        switch(d.type) {
+            case '1': d.type = 'alimentação'
                 break
-            case '2': d.tipo = 'Educação'
+            case '2': d.type = 'Educação'
                 break
-            case '3': d.tipo = 'Lazer'
+            case '3': d.type = 'Lazer'
                 break
-            case '4': d.tipo = 'Saúde'
+            case '4': d.type = 'Saúde'
                 break
-            case '5': d.tipo = 'Transporte'
+            case '5': d.type = 'Transporte'
                 break
         }
 
-        linha.insertCell(1).innerHTML = d.tipo
-        linha.insertCell(2).innerHTML = d.descricao
-        linha.insertCell(3).innerHTML = d.valor
+        line.insertCell(1).innerHTML = d.type
+        line.insertCell(2).innerHTML = d.description
+        line.insertCell(3).innerHTML = d.value
 
+        //Delete btn
+        let btn = document.createElement("button")
+        btn.className = 'btn btn-danger'
+        btn.innerHTML = '<i class="fa fa-times"></i>'
+        btn.id = `id_expense_${d.id}` 
+        btn.onclick = function() {
+            let id = this.id.replace('id_expense_', '')
+            bd.remove(id)
+            window.location.reload()
+        }
+        line.insertCell(4).append(btn)
+        console.log(d)
     })
 }
 
-//PESQUISA
-function pesquisarDespesa() {
-    let ano = document.getElementById('ano')
-    let mes = document.getElementById('mes')
-    let dia = document.getElementById('dia')
-    let tipo = document.getElementById('tipo')
-    let descricao = document.getElementById('descricao')
-    let valor = document.getElementById('valor')
+//search
+function searchExpense() {
+    let year = document.getElementById('year')
+    let month = document.getElementById('month')
+    let day = document.getElementById('day')
+    let type = document.getElementById('type')
+    let description = document.getElementById('description')
+    let value = document.getElementById('value')
     
-    let despesa = new Despesa(  //pegando valores
-        ano.value,
-        mes.value,
-        dia.value,
-        tipo.value,
-        descricao.value,
-        valor.value
+    let expense = new Expense(  //get values
+        year.value,
+        month.value,
+        day.value,
+        type.value,
+        description.value,
+        value.value
     )
-    let despesas = bd.pesquisar(despesa)
+    let expenses = bd.search(expense)
 
-    this.carregarListaDespesas(despesas, true)
+    this.loadListExpenses(expenses, true)
 
 }
